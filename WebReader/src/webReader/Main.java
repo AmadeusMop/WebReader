@@ -15,10 +15,27 @@ public class Main {
 		Scanner sc = new Scanner(System.in);
 		try {
 			String html = getHTML(parseURL("http://en.wikipedia.org/wiki/Mandelbrot_Set"));
-			System.out.println(parseHTML(html));
+			String parsed = parseHTML(html);
 		} catch(IOException e) {
 			System.out.println(e);
 		}
+		
+		String test = "</ul>";
+		test += "	<div style=\"clear:both\"></div>";
+		test += "</div>";
+		test += "<script>/*<![CDATA[*/window.jQuery && jQuery.ready();/*]]>*/</script><script>if(window.mw){";
+		test += "mw.loader.state({\"site\":\"loading\",\"user\":\"ready\",\"user.groups\":\"ready\"});";
+		test += "}</script>";
+		test += "<script>if(window.mw){";
+		test += "mw.loader.load([\"mobile.desktop\",\"mediawiki.action.view.postEdit\",\"mediawiki.user\",\"mediawiki.hidpi\",\"mediawiki.page.ready\",\"mediawiki.searchSuggest\",\"ext.cite\",\"ext.gadget.teahouse\",\"ext.gadget.ReferenceTooltips\",\"ext.gadget.DRN-wizard\",\"ext.gadget.charinsert\",\"mw.MwEmbedSupport.style\",\"ext.articleFeedbackv5.startup\",\"ext.wikimediaEvents.ve\",\"ext.navigationTiming\",\"schema.UniversalLanguageSelector\",\"ext.uls.eventlogger\",\"mw.PopUpMediaTransform\",\"skins.vector.collapsibleNav\"],null,true);";
+		test += "}</script>";
+		test += "<script src=\"//bits.wikimedia.org/en.wikipedia.org/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=scripts&amp;skin=vector&amp;*\"></script>";
+		test += "<!-- Served by mw1179 in 0.204 secs. -->";
+		test += "	</body>";
+		test += "</html>";
+		
+		System.out.println("\n\nSPLIT TEST\n" + Arrays.toString(test.split("<script.*?>(.|$|^)*?</script>")));
+		
 	}
 	
 	public static InputStream parseURL(String s) {
@@ -55,7 +72,17 @@ public class Main {
 		Matcher m = p.matcher(s);
 		m.find();
 		s = s.substring(m.start(), m.end());
-		s.split("<p>|<a.*?>|<h.>|<.*?/>");
+
+		System.out.println("TEST 1:");
+		String[] split = s.split("(<script.*?>(.|$|^)*?</script>|<(.|$^)*?>|[^a-zA-Z]*?)?+");
+		for(String str : split) {
+			System.out.print(str.trim());
+		}
+		String[] strlist = s.split("<.*?>");
+		System.out.println("TEST:");
+		for(String str : strlist) {
+			//if(!str.trim().equals("")) System.out.println(str);
+		}
 		return s;
 	}
 }
