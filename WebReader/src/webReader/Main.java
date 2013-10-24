@@ -8,34 +8,42 @@ import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import hashMap.HashMap2;
 
 public class Main {
+	
+	private static final String DEFAULT_URL = "http://en.wikipedia.org/wiki/Mandelbrot_set";
 
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
-		try {
-			String html = getHTML(parseURL("http://en.wikipedia.org/wiki/Mandelbrot_Set"));
-			String parsed = parseHTML(html);
-		} catch(IOException e) {
-			System.out.println(e);
+		boolean validURL = false;
+		String[] parsed;
+		HashMap2 hashMap = new HashMap2();
+		
+		do {
+			System.out.print("URL: ");
+			String url = sc.next();
+			if(url.equals("d")) url = DEFAULT_URL;
+			try {
+				String html = getHTML(parseURL(url));
+				parsed = parseHTML(html);
+				validURL = true;
+			} catch(Exception e) { //TODO: Handle various exceptions and print error text.
+				System.out.println(e);
+				validURL = false;
+				parsed = new String[0];
+			}
+		} while(!validURL);
+		
+		for(String word : parsed) {
+			if(hashMap.exists(word)) {
+				hashMap.set(word, Integer.toString(Integer.parseInt(hashMap.get(word))+1));
+			}
 		}
 		
-		String test = "</ul>";
-		test += "	<div style=\"clear:both\"></div>";
-		test += "</div>";
-		test += "<script>/*<![CDATA[*/window.jQuery && jQuery.ready();/*]]>*/</script><script>if(window.mw){";
-		test += "mw.loader.state({\"site\":\"loading\",\"user\":\"ready\",\"user.groups\":\"ready\"});";
-		test += "}</script>";
-		test += "<script>if(window.mw){";
-		test += "mw.loader.load([\"mobile.desktop\",\"mediawiki.action.view.postEdit\",\"mediawiki.user\",\"mediawiki.hidpi\",\"mediawiki.page.ready\",\"mediawiki.searchSuggest\",\"ext.cite\",\"ext.gadget.teahouse\",\"ext.gadget.ReferenceTooltips\",\"ext.gadget.DRN-wizard\",\"ext.gadget.charinsert\",\"mw.MwEmbedSupport.style\",\"ext.articleFeedbackv5.startup\",\"ext.wikimediaEvents.ve\",\"ext.navigationTiming\",\"schema.UniversalLanguageSelector\",\"ext.uls.eventlogger\",\"mw.PopUpMediaTransform\",\"skins.vector.collapsibleNav\"],null,true);";
-		test += "}</script>";
-		test += "<script src=\"//bits.wikimedia.org/en.wikipedia.org/load.php?debug=false&amp;lang=en&amp;modules=site&amp;only=scripts&amp;skin=vector&amp;*\"></script>";
-		test += "<!-- Served by mw1179 in 0.204 secs. -->";
-		test += "	</body>";
-		test += "</html>";
+		System.out.println(hashMap);
 		
-		System.out.println("\n\nSPLIT TEST\n" + Arrays.toString(test.split("<script.*?>(.|$|^)*?</script>")));
-		
+		sc.close();
 	}
 	
 	public static InputStream parseURL(String s) {
@@ -66,23 +74,24 @@ public class Main {
 		return str;
 	}
 	
-	private static String parseHTML(String s) {
-		//System.out.println(s);
+	private static String[] parseHTML(String s) {
 		Pattern p = Pattern.compile("<body.*?>.*?</body>", Pattern.DOTALL);
 		Matcher m = p.matcher(s);
 		m.find();
 		s = s.substring(m.start(), m.end());
-
-		System.out.println("TEST 1:");
-		String[] split = s.split("(<script.*?>(.|$|^)*?</script>|<(.|$^)*?>|[^a-zA-Z]*?)?+");
-		for(String str : split) {
-			System.out.print(str.trim());
+		
+		StringBuilder sb = new StringBuilder();
+		for(String sub : s.split("<script.*?>(.|\\n|\\r)*?</script>")) {
+			for(String sub2 : sub.split("<(.|\\n|\\r)*?>")) {
+				for(String word : sub2.split("[^a-zA-Z]+")) {
+					if(word.equals("")) continue;
+					sb.append(word);
+					sb.append(" ");
+				}
+			}
 		}
-		String[] strlist = s.split("<.*?>");
-		System.out.println("TEST:");
-		for(String str : strlist) {
-			//if(!str.trim().equals("")) System.out.println(str);
-		}
-		return s;
+		s = sb.toString();
+		String[] strlist = s.split(" ");
+		return strlist;
 	}
 }
