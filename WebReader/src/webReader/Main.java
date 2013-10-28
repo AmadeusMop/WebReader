@@ -2,6 +2,7 @@ package webReader;
 
 import hashMap.HashMap2;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
@@ -13,6 +14,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.*;
 
 /*
  * TODO:
@@ -33,10 +36,11 @@ public class Main {
 	private static final String DEFAULT_URL = "http://en.wikipedia.org/wiki/Mandelbrot_set";
 
 	public static void main(String[] args) {
-		Scanner sc = new Scanner(System.in);
+		//Scanner sc = new Scanner(System.in);
 		//boolean validURL = false;
-		List<String> parsed;
-		String s;
+		String url = DEFAULT_URL, s;
+		List<String> words;
+		Iterator<String> iter;
 		HashMap2 hashMap = new HashMap2();
 		
 		/*do {
@@ -54,17 +58,44 @@ public class Main {
 			}
 		} while(!validURL);*/
 		
-		try {
-			parsed = parseHTML(getHTML(parseURL(DEFAULT_URL)));
-			
-		} 
-		catch(Exception e) {
-			System.out.println(e);
-			parsed = new ArrayList<String>();
+		hashMap = getWords(url);
+		words = hashMap.reverseSortedKeys();
+		iter = words.iterator();
+		
+		JFrame frame = new JFrame("Web Reader");
+		JPanel panel = new JPanel();
+		JPanel wordsList = new JPanel(new GridLayout(0, 2));
+		JScrollPane scrollPane = new JScrollPane(wordsList);
+		
+		while(iter.hasNext()) {
+			s = iter.next();
+			System.out.println(s + ": " + hashMap.get(s));
+			wordsList.add(new Label(s));
+			wordsList.add(new Label(hashMap.get(s)));
 		}
 		
-		sc.close();
-			
+		panel.add(scrollPane);
+		frame.setContentPane(panel);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setPreferredSize(new Dimension(640, 480));
+		frame.pack();
+		frame.setVisible(true);
+		
+	}
+	
+	public static HashMap2 getWords(String url) {
+		List<String> parsed;
+		String html;
+		HashMap2 hashMap = new HashMap2();
+		
+		try {
+			html = getHTML(parseURL(url));
+		} catch(IOException e) {
+			html = "";
+		}
+		
+		parsed = parseHTML(html);
+		
 		for(String word : parsed) {
 			if(hashMap.exists(word)) {
 				hashMap.set(word, Integer.toString(Integer.parseInt(hashMap.get(word))+1));
@@ -73,13 +104,7 @@ public class Main {
 			}
 		}
 		
-		List<String> sorted = hashMap.reverseSortedKeys();
-		Iterator<String> iter = sorted.iterator();
-		while(iter.hasNext()) {
-			s = iter.next();
-			System.out.println(s + ": " + hashMap.get(s));
-		}
-		
+		return hashMap;
 	}
 	
 	public static InputStream parseURL(String s) {
