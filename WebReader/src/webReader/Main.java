@@ -34,11 +34,12 @@ import javax.swing.*;
 public class Main {
 	
 	private static final String DEFAULT_URL = "http://en.wikipedia.org/wiki/Mandelbrot_set";
+	private static final int MIN_WORDS = 10;
 
 	public static void main(String[] args) {
 		//Scanner sc = new Scanner(System.in);
 		//boolean validURL = false;
-		String url = DEFAULT_URL, s;
+		String url = DEFAULT_URL, s, v;
 		List<String> words;
 		Iterator<String> iter;
 		HashMap2 hashMap = new HashMap2();
@@ -65,22 +66,28 @@ public class Main {
 		JFrame frame = new JFrame("Web Reader");
 		JPanel panel = new JPanel();
 		JPanel wordsList = new JPanel(new GridLayout(0, 2));
+		JButton button = new JButton("Submit");
+		JTextField textbox = new JTextField();
 		JScrollPane scrollPane = new JScrollPane(wordsList);
+		scrollPane.setPreferredSize(new Dimension(640, 480));
 		
 		while(iter.hasNext()) {
 			s = iter.next();
-			System.out.println(s + ": " + hashMap.get(s));
+			v = hashMap.get(s);
+			if(Integer.parseInt(v) < MIN_WORDS) break;
 			wordsList.add(new Label(s));
 			wordsList.add(new Label(hashMap.get(s)));
 		}
 		
+		panel.add(textbox);
+		panel.add(button);
 		panel.add(scrollPane);
+		
 		frame.setContentPane(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setPreferredSize(new Dimension(640, 480));
 		frame.pack();
 		frame.setVisible(true);
-		
 	}
 	
 	public static HashMap2 getWords(String url) {
