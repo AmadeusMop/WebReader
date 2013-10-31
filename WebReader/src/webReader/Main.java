@@ -44,6 +44,7 @@ public class Main {
 		List<String> words;
 		Iterator<String> iter;
 		HashMap2 hashMap = new HashMap2();
+		Screen screen = new Screen();
 		
 		/*do {
 			System.out.print("URL: ");
@@ -64,13 +65,7 @@ public class Main {
 		words = hashMap.reverseSortedKeys();
 		iter = words.iterator();
 		
-		JFrame frame = new JFrame("Web Reader");
-		JPanel panel = new JPanel();
 		JPanel wordsList = new JPanel(new GridLayout(0, 2));
-		JButton button = new JButton("Submit");
-		JTextField textbox = new JTextField();
-		JScrollPane scrollPane = new JScrollPane(wordsList);
-		scrollPane.setPreferredSize(new Dimension(640, 480));
 		
 		while(iter.hasNext()) {
 			s = iter.next();
@@ -80,14 +75,7 @@ public class Main {
 			wordsList.add(new Label(hashMap.get(s)));
 		}
 		
-		panel.add(textbox);
-		panel.add(button);
-		panel.add(scrollPane);
-		
-		frame.setContentPane(panel);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setPreferredSize(new Dimension(640, 480));
-		frame.pack();
-		frame.setVisible(true);
+		screen.Update();
+		screen.addWordsList(wordsList);
 	}
 }

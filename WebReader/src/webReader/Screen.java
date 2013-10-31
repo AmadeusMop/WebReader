@@ -26,5 +26,26 @@ public class Screen {
 		textbox = new JTextField();
 		scrollPane = new JScrollPane(wordsList);
 		scrollPane.setPreferredSize(new Dimension(640, 480));
+		
+		panel.add(textbox);
+		panel.add(button);
+		panel.add(scrollPane);
+		
+		frame.setContentPane(panel);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setPreferredSize(new Dimension(640, 480));
+	}
+	
+	public void Update() {
+		frame.pack();
+		frame.setVisible(true);
+	}
+	
+	public void addWordsList(JPanel words) {
+		this.wordsList = words;
+		scrollPane = new JScrollPane(wordsList);
+		scrollPane.setPreferredSize(new Dimension(640, 480));
+		panel.add(scrollPane);
+		Update();
 	}
 }
