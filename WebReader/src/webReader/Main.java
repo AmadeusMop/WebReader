@@ -39,7 +39,8 @@ public class Main {
 	public static void main(String[] args) {
 		//Scanner sc = new Scanner(System.in);
 		//boolean validURL = false;
-		String url = DEFAULT_URL, s, v;
+		String s, v;
+		URLParser parser = new URLParser(DEFAULT_URL);
 		List<String> words;
 		Iterator<String> iter;
 		HashMap2 hashMap = new HashMap2();
@@ -59,7 +60,7 @@ public class Main {
 			}
 		} while(!validURL);*/
 		
-		hashMap = getWords(url);
+		hashMap = parser.getWordMap();
 		words = hashMap.reverseSortedKeys();
 		iter = words.iterator();
 		
@@ -88,75 +89,5 @@ public class Main {
 		frame.setPreferredSize(new Dimension(640, 480));
 		frame.pack();
 		frame.setVisible(true);
-	}
-	
-	public static HashMap2 getWords(String url) {
-		List<String> parsed;
-		String html;
-		HashMap2 hashMap = new HashMap2();
-		
-		try {
-			html = getHTML(parseURL(url));
-		} catch(IOException e) {
-			html = "";
-		}
-		
-		parsed = parseHTML(html);
-		
-		for(String word : parsed) {
-			if(hashMap.exists(word)) {
-				hashMap.set(word, Integer.toString(Integer.parseInt(hashMap.get(word))+1));
-			} else {
-				hashMap.add(word, "1");
-			}
-		}
-		
-		return hashMap;
-	}
-	
-	public static InputStream parseURL(String s) {
-		try {
-			URL url = new URL(s);
-			return url.openStream();
-		} catch(Exception e) { //TODO: Better exception handling.
-			System.out.println(e);
-			return new StringBufferInputStream(s);
-		}
-	}
-	
-	public static String getHTML(InputStream s) throws IOException {
-		byte[] barray = new byte[20];
-		byte[] temp;
-		int i = 0, b = s.read();
-		while(b != -1) {
-			if(i == barray.length) {
-				temp = Arrays.copyOf(barray, i+20);
-				barray = temp;
-			}
-			barray[i] = (byte)b;
-			i++;
-			b = s.read();
-		}
-		String str = new String(barray);
-		//str = 
-		return str;
-	}
-	
-	private static List<String> parseHTML(String s) {
-		Pattern p = Pattern.compile("<body.*?>.*?</body>", Pattern.DOTALL);
-		Matcher m = p.matcher(s);
-		m.find();
-		s = s.substring(m.start(), m.end());
-		
-		List<String> wordList = new ArrayList<String>();
-		for(String sub : s.split("<script.*?>(.|\\n|\\r)*?</script>")) {
-			for(String sub2 : sub.split("<(.|\\n|\\r)*?>")) {
-				for(String word : sub2.split("[^a-zA-Z]+")) {
-					if(word.equals("")) continue;
-					wordList.add(word.toLowerCase());
-				}
-			}
-		}
-		return wordList;
 	}
 }
