@@ -4,7 +4,6 @@ import hashMap.HashMap2;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,16 +13,15 @@ import java.util.regex.Pattern;
 
 public class URLParser {
 	private String url, html;
-	private List<String> words;
 	private boolean valid;
 	
-	public static void main(String[] args) {
-		
+	public URLParser(String url) {
+		setURL(url);
 	}
 	
-	public URLParser(String url) {
-		this.url = url;
-		this.html = parseURL(url);
+	public URLParser() {
+		this.url = "";
+		this.html = "";
 	}
 	
 	public void setURL(String url) {
@@ -48,16 +46,20 @@ public class URLParser {
 		return hashMap;
 	}
 	
-	public String parseURL(String s) {
+	public boolean isValid() {
+		return valid;
+	}
+	
+	private String parseURL(String s) throws IllegalArgumentException {
 		try {
 			URL url = new URL(s);
-			String html = getHTML(url.openStream());
+			this.html = getHTML(url.openStream());
 			this.valid = true;
 			return html;
-		} catch(Exception e) { //TODO: Better exception handling.
-			System.out.println(e);
+		} catch(IOException e) {
+			this.html = "";
 			this.valid = false;
-			return "";
+			throw new IllegalArgumentException(url);
 		}
 	}
 	
@@ -75,17 +77,19 @@ public class URLParser {
 			b = s.read();
 		}
 		String str = new String(barray);
-		//str = 
 		return str;
 	}
 	
 	private List<String> parseHTML(String s) {
+		List<String> wordList = new ArrayList<String>();
+		
+		if(!s.matches(".*<body.*?>.*</body>.*")) return wordList;
+		
 		Pattern p = Pattern.compile("<body.*?>.*?</body>", Pattern.DOTALL);
 		Matcher m = p.matcher(s);
 		m.find();
 		s = s.substring(m.start(), m.end());
 		
-		List<String> wordList = new ArrayList<String>();
 		for(String sub : s.split("<script.*?>(.|\\n|\\r)*?</script>")) {
 			for(String sub2 : sub.split("<(.|\\n|\\r)*?>")) {
 				for(String word : sub2.split("[^a-zA-Z]+")) {
