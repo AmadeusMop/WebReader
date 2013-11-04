@@ -88,10 +88,9 @@ public class URLParser {
 		if(m.find()) {
 			s = m.group();
 			
-			p = Pattern.compile("<script.*?>(.|\\n|\\r)*?</script>");
-			m = p.matcher(s);
+			System.out.println(s);
 			
-			for(String sub : s.split("<script.*?>(.|\\n|\\r)*?</script>")) {
+			for(String sub : s.split("<script(.|\\n|\\r)*?/script>")) {
 				for(String sub2 : sub.split("<(.|\\n|\\r)*?>")) {
 					for(String word : sub2.split("[^a-zA-Z]+")) {
 						if(word.equals("")) continue;
