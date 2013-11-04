@@ -47,6 +47,8 @@ public class Screen {
 		
 		button.addActionListener(new URLSubmitButtonListener(this, parser, textbox));
 		
+		textbox.setText("http://en.wikipedia.org/wiki/Mandelbrot_Set");
+		
 		panel.add(textbox);
 		panel.add(button);
 		panel.add(errorSpace);
@@ -79,9 +81,9 @@ public class Screen {
 			empty = false;
 		}
 		
-		/*if(empty) {
+		if(empty) {
 			showError("No words found.");
-		}*/
+		}
 	}
 	
 	public void showError(String s) {
@@ -111,7 +113,9 @@ class URLSubmitButtonListener implements ActionListener {
 			parser.setURL(url);
 			screen.setWords(parser.getWordMap());
 		} catch(IllegalArgumentException e) {
-			screen.showError("\"" + url + "\" is not a valid URL!");
+			screen.showError("\"" + url + "\" is not a valid URL.");
+		} catch(Exception e) {
+			screen.showError(e.getMessage());
 		}
 		screen.Update();
 	}

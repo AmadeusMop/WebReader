@@ -83,20 +83,24 @@ public class URLParser {
 	private List<String> parseHTML(String s) {
 		List<String> wordList = new ArrayList<String>();
 		
-		if(!s.matches(".*<body.*?>.*</body>.*")) return wordList;
-		
-		Pattern p = Pattern.compile("<body.*?>.*?</body>", Pattern.DOTALL);
+		Pattern p = Pattern.compile("<body.*?>(.|\\n|\\r).*</body.*?>", Pattern.DOTALL);
 		Matcher m = p.matcher(s);
-		m.find();
-		s = s.substring(m.start(), m.end());
-		
-		for(String sub : s.split("<script.*?>(.|\\n|\\r)*?</script>")) {
-			for(String sub2 : sub.split("<(.|\\n|\\r)*?>")) {
-				for(String word : sub2.split("[^a-zA-Z]+")) {
-					if(word.equals("")) continue;
-					wordList.add(word.toLowerCase());
+		if(m.find()) {
+			s = m.group();
+			
+			p = Pattern.compile("<script.*?>(.|\\n|\\r)*?</script>");
+			m = p.matcher(s);
+			
+			for(String sub : s.split("<script.*?>(.|\\n|\\r)*?</script>")) {
+				for(String sub2 : sub.split("<(.|\\n|\\r)*?>")) {
+					for(String word : sub2.split("[^a-zA-Z]+")) {
+						if(word.equals("")) continue;
+						wordList.add(word.toLowerCase());
+					}
 				}
 			}
+		} else {
+			System.out.println("Hello 2!");
 		}
 		return wordList;
 	}
