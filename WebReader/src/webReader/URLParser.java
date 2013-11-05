@@ -26,7 +26,7 @@ public class URLParser {
 	
 	public void setURL(String url) {
 		this.url = url;
-		this.html = parseURL(url);
+		this.html = parseURL();
 	}
 	
 	public HashMap2 getWordMap() {
@@ -50,10 +50,24 @@ public class URLParser {
 		return valid;
 	}
 	
-	private String parseURL(String s) throws IllegalArgumentException {
+	
+	String parseURLTest() throws IllegalArgumentException {
+		return parseURL();
+	}
+	
+	String getHTMLTest(InputStream s) throws IOException {
+		return getHTML(s);
+	}
+	
+	List<String> parseHTMLTest(String s) throws IllegalArgumentException {
+		return parseHTML(s);
+	}
+	
+	
+	private String parseURL() {
 		try {
-			URL url = new URL(s);
-			this.html = getHTML(url.openStream());
+			URL urlObject = new URL(url);
+			this.html = getHTML(urlObject.openStream());
 			this.valid = true;
 			return html;
 		} catch(IOException e) {

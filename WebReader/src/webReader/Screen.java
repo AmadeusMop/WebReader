@@ -131,7 +131,7 @@ class URLSubmitButtonListener implements ActionListener {
 		} catch(IllegalArgumentException e) {
 			screen.showError("\"" + url + "\" is not a valid URL.");
 		} catch(Exception e) {
-			screen.showError(e.getMessage());
+			screen.showError(e.toString());
 			throw e;
 		}
 		screen.Update();
