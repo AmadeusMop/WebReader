@@ -97,20 +97,21 @@ public class URLParser {
 	private List<String> parseHTML(String s) {
 		List<String> wordList = new ArrayList<String>();
 		
-		Pattern p = Pattern.compile("<body.*?>(.|\\n|\\r).*</body.*?>", Pattern.DOTALL);
+		Pattern p = Pattern.compile("<body.*?>(.|\n|\r).*</body.*?>", Pattern.DOTALL);
 		Matcher m = p.matcher(s);
 		if(m.find()) {
 			s = m.group();
 			
+			s = s.replace("\n", " ");
+			System.out.println(s);
+			s = s.replaceAll("<script*?/script>", "");
+			s = s.replaceAll("<.*?>", "");
+			System.out.println("HELLO");
 			System.out.println(s);
 			
-			for(String sub : s.split("<script(.|\\n|\\r)*?/script>")) {
-				for(String sub2 : sub.split("<(.|\\n|\\r)*?>")) {
-					for(String word : sub2.split("[^a-zA-Z]+")) {
-						if(word.equals("")) continue;
-						wordList.add(word.toLowerCase());
-					}
-				}
+			for(String word : s.split("[^a-zA-Z]+")) {
+				if(word.equals("")) continue;
+				wordList.add(word.toLowerCase());
 			}
 		} else {
 			System.out.println("Hello 2!");
