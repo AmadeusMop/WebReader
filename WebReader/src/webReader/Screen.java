@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -29,8 +30,10 @@ public class Screen {
 	private JPanel panel;
 	private JPanel submitField;
 	private JPanel freqField;
+	private JPanel optionsField;
 	private JPanel wordsList;
 	private JPanel errorSpace;
+	private JCheckBox filterCheckbox;
 	private JButton submitButton;
 	private JButton clearButton;
 	private JSpinner freqbox;
@@ -51,8 +54,11 @@ public class Screen {
 		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
 		submitField = new JPanel();
 		freqField = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 1));
+		optionsField = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 1));
 		wordsList = new JPanel(new GridLayout(0, 2));
+		((GridLayout) wordsList.getLayout()).setVgap(2);
 		errorSpace = new JPanel();
+		filterCheckbox = new JCheckBox("Filter common words", true);
 		submitButton = new JButton("Submit");
 		clearButton = new JButton("Clear");
 		freqbox = new JSpinner(new SpinnerNumberModel(10, 0, 999, 1));
@@ -60,7 +66,7 @@ public class Screen {
 		scrollPane = new JScrollPane(wordsList);
 		scrollPane.setPreferredSize(new Dimension(640, 480));
 		
-		submitButton.addActionListener(new URLSubmitButtonListener(this, parser, textbox, freqbox));
+		submitButton.addActionListener(new URLSubmitButtonListener(this, parser, textbox, freqbox, filterCheckbox));
 		clearButton.addActionListener(new ClearButtonListener(this));
 		
 		textbox.setText("en.wikipedia.org/wiki/Mandelbrot_Set");
@@ -71,10 +77,12 @@ public class Screen {
 		submitField.add(clearButton);
 		freqField.add(new Label("Hide words that appear fewer than"));
 		freqField.add(freqbox);
-		freqField.add(new Label("times."));
+		freqField.add(new Label("times"));
+		optionsField.add(filterCheckbox);
 		
 		panel.add(submitField);
 		panel.add(freqField);
+		panel.add(optionsField);
 		panel.add(errorSpace);
 		panel.add(scrollPane);
 		
@@ -125,6 +133,7 @@ public class Screen {
 	void clear() {
 		wordsList.removeAll();
 		errorSpace.removeAll();
+		textbox.setText("");
 	}
 }
 
@@ -145,12 +154,14 @@ class URLSubmitButtonListener implements ActionListener {
 	URLParser parser;
 	JTextComponent textbox;
 	JSpinner freqbox;
+	JCheckBox checkbox;
 	
-	public URLSubmitButtonListener(Screen screen, URLParser parser, JTextComponent textbox, JSpinner freqbox) {
+	public URLSubmitButtonListener(Screen screen, URLParser parser, JTextComponent textbox, JSpinner freqbox, JCheckBox checkbox) {
 		this.screen = screen;
 		this.parser = parser;
 		this.textbox = textbox;
 		this.freqbox = freqbox;
+		this.checkbox = checkbox;
 	}
 	
 	public void actionPerformed(ActionEvent event) {
@@ -160,7 +171,7 @@ class URLSubmitButtonListener implements ActionListener {
 		
 		try {
 			parser.setURL(url);
-			screen.setWords(parser.getWordMap());
+			screen.setWords(parser.getWordMap(checkbox.isSelected()));
 		} catch(IllegalArgumentException e) {
 			screen.showError("\"" + url + "\" is not a valid URL.");
 		} catch(Exception e) {
