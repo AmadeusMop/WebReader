@@ -4,6 +4,7 @@ import hashMap.HashMap2;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
@@ -11,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -25,9 +27,12 @@ public class Screen {
 
 	private JFrame frame;
 	private JPanel panel;
+	private JPanel submitField;
+	private JPanel freqField;
 	private JPanel wordsList;
 	private JPanel errorSpace;
-	private JButton button;
+	private JButton submitButton;
+	private JButton clearButton;
 	private JSpinner freqbox;
 	private JTextField textbox;
 	private JScrollPane scrollPane;
@@ -43,22 +48,33 @@ public class Screen {
 		
 		frame = new JFrame("Web Reader");
 		panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
+		submitField = new JPanel();
+		freqField = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 1));
 		wordsList = new JPanel(new GridLayout(0, 2));
 		errorSpace = new JPanel();
-		button = new JButton("Submit");
+		submitButton = new JButton("Submit");
+		clearButton = new JButton("Clear");
 		freqbox = new JSpinner(new SpinnerNumberModel(10, 0, 999, 1));
 		textbox = new JTextField(30);
 		scrollPane = new JScrollPane(wordsList);
 		scrollPane.setPreferredSize(new Dimension(640, 480));
 		
-		button.addActionListener(new URLSubmitButtonListener(this, parser, textbox, freqbox));
+		submitButton.addActionListener(new URLSubmitButtonListener(this, parser, textbox, freqbox));
+		clearButton.addActionListener(new ClearButtonListener(this));
 		
 		textbox.setText("en.wikipedia.org/wiki/Mandelbrot_Set");
 		
-		panel.add(new Label("http://"));
-		panel.add(textbox);
-		panel.add(button);
-		panel.add(freqbox);
+		submitField.add(new Label("http://"));
+		submitField.add(textbox);
+		submitField.add(submitButton);
+		submitField.add(clearButton);
+		freqField.add(new Label("Hide words that appear fewer than"));
+		freqField.add(freqbox);
+		freqField.add(new Label("times."));
+		
+		panel.add(submitField);
+		panel.add(freqField);
 		panel.add(errorSpace);
 		panel.add(scrollPane);
 		
@@ -104,6 +120,23 @@ public class Screen {
 		Label l = new Label(s);
 		l.setForeground(Color.red);
 		errorSpace.add(l);
+	}
+	
+	void clear() {
+		wordsList.removeAll();
+		errorSpace.removeAll();
+	}
+}
+
+class ClearButtonListener implements ActionListener {
+	Screen screen;
+	
+	public ClearButtonListener(Screen screen) {
+		this.screen = screen;
+	}
+	
+	public void actionPerformed(ActionEvent event) {
+		screen.clear();
 	}
 }
 
