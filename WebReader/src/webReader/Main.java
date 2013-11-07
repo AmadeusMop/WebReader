@@ -2,11 +2,8 @@ package webReader;
 
 /*
  * TODO:
- *  -Add a minimum frequency input.
- *  -Add unit tests:
- *  	-URL parse test
- *  	-HTML parse test
- *  	-Graceful input fail test
+ *  -Switch results area (wordsList) from GridLayout to BoxLayout?
+ *  -Maybe add a multi-result grid for comparing many sites?
  */
 
 public class Main {

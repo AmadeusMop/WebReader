@@ -1,6 +1,6 @@
 package webReader;
 
-import hashMap.HashMap2;
+import hashMap.IntegerHashMap2;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,22 +35,22 @@ public class URLParser {
 		this.html = parseURL();
 	}
 	
-	public HashMap2 getWordMap(boolean filter) {
+	public IntegerHashMap2 getWordMap(boolean filter) {
 		filterStopWords = filter;
 		return getWordMap();
 	}
 	
-	public HashMap2 getWordMap() {
+	public IntegerHashMap2 getWordMap() {
 		List<String> parsed;
-		HashMap2 hashMap = new HashMap2();
+		IntegerHashMap2 hashMap = new IntegerHashMap2();
 		
 		parsed = parseHTML(html);
 		
 		for(String word : parsed) {
 			if(hashMap.exists(word)) {
-				hashMap.set(word, Integer.toString(Integer.parseInt(hashMap.get(word))+1));
+				hashMap.set(word, hashMap.get(word)+1);
 			} else {
-				hashMap.add(word, "1");
+				hashMap.add(word, 1);
 			}
 		}
 		
@@ -112,14 +112,11 @@ public class URLParser {
 		Matcher m = p.matcher(s);
 		if(m.find()) {
 			s = m.group();
-			
+
+			s = s.toLowerCase();
 			s = s.replace("\n", " ");
-			System.out.println(s);
 			s = s.replaceAll("<script*?/script>", "");
 			s = s.replaceAll("<.*?>", "");
-			System.out.println("HELLO");
-			System.out.println(s);
-			s = s.toLowerCase();
 			
 			for(String word : s.split("[^a-zA-Z]+")) {
 				if(filterStopWords) {
@@ -128,7 +125,6 @@ public class URLParser {
 				wordList.add(word.toLowerCase());
 			}
 		} else {
-			System.out.println("Hello 2!");
 		}
 		return wordList;
 	}

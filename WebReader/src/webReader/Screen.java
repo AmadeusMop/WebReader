@@ -1,6 +1,6 @@
 package webReader;
 
-import hashMap.HashMap2;
+import hashMap.IntegerHashMap2;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -33,6 +33,7 @@ public class Screen {
 	private JPanel optionsField;
 	private JPanel wordsList;
 	private JPanel errorSpace;
+	private JPanel resultsField;
 	private JCheckBox filterCheckbox;
 	private JButton submitButton;
 	private JButton clearButton;
@@ -40,13 +41,15 @@ public class Screen {
 	private JTextField textbox;
 	private JScrollPane scrollPane;
 	
+	private IntegerHashMap2 words;
+	
 	private URLParser parser;
 	
 	private int minFreq;
 	
 	public Screen(URLParser p) {
 		parser = p;
-		
+		words = new IntegerHashMap2();
 		minFreq = 10;
 		
 		frame = new JFrame("Web Reader");
@@ -58,9 +61,11 @@ public class Screen {
 		wordsList = new JPanel(new GridLayout(0, 2));
 		((GridLayout) wordsList.getLayout()).setVgap(2);
 		errorSpace = new JPanel();
+		resultsField = new JPanel();
+		resultsField.setLayout(new BoxLayout(resultsField, BoxLayout.Y_AXIS));
 		filterCheckbox = new JCheckBox("Filter common words", true);
 		submitButton = new JButton("Submit");
-		clearButton = new JButton("Clear");
+		clearButton = new JButton("Clear All");
 		freqbox = new JSpinner(new SpinnerNumberModel(10, 0, 999, 1));
 		textbox = new JTextField(30);
 		scrollPane = new JScrollPane(wordsList);
@@ -74,17 +79,18 @@ public class Screen {
 		submitField.add(new Label("http://"));
 		submitField.add(textbox);
 		submitField.add(submitButton);
-		submitField.add(clearButton);
 		freqField.add(new Label("Hide words that appear fewer than"));
 		freqField.add(freqbox);
 		freqField.add(new Label("times"));
 		optionsField.add(filterCheckbox);
+		resultsField.add(clearButton);
+		resultsField.add(scrollPane);
 		
 		panel.add(submitField);
 		panel.add(freqField);
 		panel.add(optionsField);
 		panel.add(errorSpace);
-		panel.add(scrollPane);
+		panel.add(resultsField);
 		
 		frame.setContentPane(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -96,20 +102,22 @@ public class Screen {
 		frame.setVisible(true);
 	}
 	
-	public void setWords(HashMap2 hashMap) {
+	public void addWords(IntegerHashMap2 hashMap) {
 		wordsList.removeAll();
 		errorSpace.removeAll();
-		List<String> l = hashMap.reverseSortedKeys();
+		words.add(hashMap);
+		List<String> l = words.reverseSortedKeys();
 		Iterator<String> iter = l.iterator();
-		String s, v;
+		String s;
+		int v;
 		boolean empty = true;
 		
 		while(iter.hasNext()) {
 			s = iter.next();
-			v = hashMap.get(s);
-			if(Integer.parseInt(v) < minFreq) break;
+			v = words.get(s);
+			if(v < minFreq) break;
 			wordsList.add(new Label(s));
-			wordsList.add(new Label(hashMap.get(s)));
+			wordsList.add(new Label(Integer.toString(v)));
 			empty = false;
 		}
 		
@@ -133,7 +141,7 @@ public class Screen {
 	void clear() {
 		wordsList.removeAll();
 		errorSpace.removeAll();
-		textbox.setText("");
+		words = new IntegerHashMap2();
 	}
 }
 
@@ -171,7 +179,7 @@ class URLSubmitButtonListener implements ActionListener {
 		
 		try {
 			parser.setURL(url);
-			screen.setWords(parser.getWordMap(checkbox.isSelected()));
+			screen.addWords(parser.getWordMap(checkbox.isSelected()));
 		} catch(IllegalArgumentException e) {
 			screen.showError("\"" + url + "\" is not a valid URL.");
 		} catch(Exception e) {
