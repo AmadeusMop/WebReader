@@ -9,6 +9,7 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,7 +22,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.text.JTextComponent;
 
 
 public class Screen {
@@ -42,6 +42,7 @@ public class Screen {
 	private JScrollPane scrollPane;
 	
 	private IntegerHashMap2 words;
+	private List<String> URLs;
 	
 	private URLParser parser;
 	
@@ -51,6 +52,7 @@ public class Screen {
 		parser = p;
 		words = new IntegerHashMap2();
 		minFreq = 10;
+		URLs = new ArrayList<String>();
 		
 		frame = new JFrame("Web Reader");
 		panel = new JPanel();
@@ -71,7 +73,7 @@ public class Screen {
 		scrollPane = new JScrollPane(wordsList);
 		scrollPane.setPreferredSize(new Dimension(640, 480));
 		
-		submitButton.addActionListener(new URLSubmitButtonListener(this, parser, textbox, freqbox, filterCheckbox));
+		submitButton.addActionListener(new URLSubmitButtonListener(this));
 		clearButton.addActionListener(new ClearButtonListener(this));
 		
 		textbox.setText("en.wikipedia.org/wiki/Mandelbrot_Set");
@@ -138,10 +140,30 @@ public class Screen {
 		errorSpace.add(l);
 	}
 	
+	void submit() {
+		String url = "http://" + textbox.getText();
+		URLs.add(url);
+		if(URLs.contains(url) && URLs.size() == 1) words = new IntegerHashMap2();
+		int f = (Integer) freqbox.getValue();
+		setMinFreq(f);
+		
+		try {
+			parser.setURL(url);
+			addWords(parser.getWordMap(filterCheckbox.isSelected()));
+		} catch(IllegalArgumentException e) {
+			showError("\"" + url + "\" is not a valid URL.");
+		} catch(Exception e) {
+			showError(e.toString());
+			throw e;
+		}
+		Update();
+	}
+	
 	void clear() {
 		wordsList.removeAll();
 		errorSpace.removeAll();
 		words = new IntegerHashMap2();
+		URLs = new ArrayList<String>();
 	}
 }
 
@@ -159,33 +181,12 @@ class ClearButtonListener implements ActionListener {
 
 class URLSubmitButtonListener implements ActionListener {
 	Screen screen;
-	URLParser parser;
-	JTextComponent textbox;
-	JSpinner freqbox;
-	JCheckBox checkbox;
 	
-	public URLSubmitButtonListener(Screen screen, URLParser parser, JTextComponent textbox, JSpinner freqbox, JCheckBox checkbox) {
+	public URLSubmitButtonListener(Screen screen) {
 		this.screen = screen;
-		this.parser = parser;
-		this.textbox = textbox;
-		this.freqbox = freqbox;
-		this.checkbox = checkbox;
 	}
 	
 	public void actionPerformed(ActionEvent event) {
-		String url = "http://" + textbox.getText();
-		int f = (Integer) freqbox.getValue();
-		screen.setMinFreq(f);
-		
-		try {
-			parser.setURL(url);
-			screen.addWords(parser.getWordMap(checkbox.isSelected()));
-		} catch(IllegalArgumentException e) {
-			screen.showError("\"" + url + "\" is not a valid URL.");
-		} catch(Exception e) {
-			screen.showError(e.toString());
-			throw e;
-		}
-		screen.Update();
+		screen.submit();
 	}
 }
