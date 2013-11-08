@@ -4,6 +4,7 @@ package webReader;
  * TODO:
  *  -Switch results area (wordsList) from GridLayout to BoxLayout?
  *  -Maybe add a multi-result grid for comparing many sites?
+ *  -Associate results with specific URLs
  */
 
 public class Main {

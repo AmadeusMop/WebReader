@@ -9,9 +9,11 @@ import java.awt.GridLayout;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -25,6 +27,9 @@ import javax.swing.SpinnerNumberModel;
 
 
 public class Screen {
+	
+	private static final String[] stopWordsArray = {"", "a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your"};
+	private static final List<String> stopWords = Arrays.asList(stopWordsArray);
 
 	private JFrame frame;
 	private JPanel panel;
@@ -42,7 +47,7 @@ public class Screen {
 	private JScrollPane scrollPane;
 	
 	private IntegerHashMap2 words;
-	private List<String> URLs;
+	private Set<String> URLs;
 	
 	private URLParser parser;
 	
@@ -52,7 +57,7 @@ public class Screen {
 		parser = p;
 		words = new IntegerHashMap2();
 		minFreq = 10;
-		URLs = new ArrayList<String>();
+		URLs = new HashSet<String>();
 		
 		frame = new JFrame("Web Reader");
 		panel = new JPanel();
@@ -65,7 +70,7 @@ public class Screen {
 		errorSpace = new JPanel();
 		resultsField = new JPanel();
 		resultsField.setLayout(new BoxLayout(resultsField, BoxLayout.Y_AXIS));
-		filterCheckbox = new JCheckBox("Filter common words", true);
+		filterCheckbox = new JCheckBox("Do not show common words", true);
 		submitButton = new JButton("Submit");
 		clearButton = new JButton("Clear All Results");
 		freqbox = new JSpinner(new SpinnerNumberModel(10, 0, 999, 1));
@@ -101,29 +106,16 @@ public class Screen {
 	
 	public void Update() {
 		frame.pack();
+		frame.validate();
+		frame.repaint();
 		frame.setVisible(true);
 	}
 	
 	public void addWords(IntegerHashMap2 hashMap) {
-		wordsList.removeAll();
 		errorSpace.removeAll();
 		words.add(hashMap);
-		List<String> l = words.reverseSortedKeys();
-		Iterator<String> iter = l.iterator();
-		String s;
-		int v;
-		boolean empty = true;
 		
-		while(iter.hasNext()) {
-			s = iter.next();
-			v = words.get(s);
-			if(v < minFreq) break;
-			wordsList.add(new Label(s));
-			wordsList.add(new Label(Integer.toString(v)));
-			empty = false;
-		}
-		
-		if(empty) {
+		if(updateWordsList()) {
 			showError("No words found.");
 		}
 	}
@@ -134,28 +126,63 @@ public class Screen {
 	
 	public void showError(String s) {
 		wordsList.removeAll();
+		showMessage(s);
+	}
+	
+	private boolean updateWordsList() {
+		wordsList.removeAll();
+		List<String> l = words.reverseSortedKeys();
+		Iterator<String> iter = l.iterator();
+		String s;
+		int v;
+		boolean empty = true, b = filterCheckbox.isSelected();
+		
+		while(iter.hasNext()) {
+			s = iter.next();
+			v = words.get(s);
+			if(b && stopWords.contains(s)) continue;
+			if(v < minFreq) break;
+			wordsList.add(new Label(s));
+			wordsList.add(new Label(Integer.toString(v)));
+			empty = false;
+		}
+		
+		return empty;
+	}
+	
+	private void showMessage(String s, Color c) {
 		errorSpace.removeAll();
 		Label l = new Label(s);
-		l.setForeground(Color.red);
+		l.setForeground(c);
 		errorSpace.add(l);
 	}
 	
+	private void showMessage(String s) {
+		showMessage(s, Color.red);
+	}
+	
 	void submit() {
+		showMessage("");
 		String url = "http://" + textbox.getText();
+		if(URLs.contains(url)) {
+			updateWordsList();
+			return;
+		}
+		
 		URLs.add(url);
-		if(URLs.contains(url) && URLs.size() == 1) words = new IntegerHashMap2();
 		int f = (Integer) freqbox.getValue();
 		setMinFreq(f);
 		
 		try {
 			parser.setURL(url);
-			addWords(parser.getWordMap(filterCheckbox.isSelected()));
+			addWords(parser.getWordMap());
 		} catch(IllegalArgumentException e) {
 			showError("\"" + url + "\" is not a valid URL.");
 		} catch(Exception e) {
 			showError(e.toString());
 			throw e;
 		}
+		showMessage("Done!");
 		Update();
 	}
 	
@@ -163,7 +190,7 @@ public class Screen {
 		wordsList.removeAll();
 		errorSpace.removeAll();
 		words = new IntegerHashMap2();
-		URLs = new ArrayList<String>();
+		URLs = new HashSet<String>();
 	}
 }
 

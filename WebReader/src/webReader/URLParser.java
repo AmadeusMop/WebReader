@@ -12,12 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class URLParser {
-	private static final String[] stopWordsArray = {"", "a", "able", "about", "across", "after", "all", "almost", "also", "am", "among", "an", "and", "any", "are", "as", "at", "be", "because", "been", "but", "by", "can", "cannot", "could", "dear", "did", "do", "does", "either", "else", "ever", "every", "for", "from", "get", "got", "had", "has", "have", "he", "her", "hers", "him", "his", "how", "however", "i", "if", "in", "into", "is", "it", "its", "just", "least", "let", "like", "likely", "may", "me", "might", "most", "must", "my", "neither", "no", "nor", "not", "of", "off", "often", "on", "only", "or", "other", "our", "own", "rather", "said", "say", "says", "she", "should", "since", "so", "some", "than", "that", "the", "their", "them", "then", "there", "these", "they", "this", "tis", "to", "too", "twas", "us", "wants", "was", "we", "were", "what", "when", "where", "which", "while", "who", "whom", "why", "will", "with", "would", "yet", "you", "your"};
-	
-	private static final List<String> stopWords = Arrays.asList(stopWordsArray);
-	
 	private String url, html;
-	private boolean valid, filterStopWords;
+	private boolean valid;
 	
 	public URLParser(String url) {
 		this();
@@ -27,17 +23,11 @@ public class URLParser {
 	public URLParser() {
 		this.url = "";
 		this.html = "";
-		this.filterStopWords = true;
 	}
 	
 	public void setURL(String url) {
 		this.url = url;
 		this.html = parseURL();
-	}
-	
-	public IntegerHashMap2 getWordMap(boolean filter) {
-		filterStopWords = filter;
-		return getWordMap();
 	}
 	
 	public IntegerHashMap2 getWordMap() {
@@ -119,9 +109,6 @@ public class URLParser {
 			s = s.replaceAll("<.*?>", "");
 			
 			for(String word : s.split("[^a-zA-Z]+")) {
-				if(filterStopWords) {
-					if(stopWords.contains(word)) continue;
-				}
 				wordList.add(word.toLowerCase());
 			}
 		} else {
