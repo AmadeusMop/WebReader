@@ -65,7 +65,7 @@ public class Screen {
 		resultsField.setLayout(new BoxLayout(resultsField, BoxLayout.Y_AXIS));
 		filterCheckbox = new JCheckBox("Filter common words", true);
 		submitButton = new JButton("Submit");
-		clearButton = new JButton("Clear All");
+		clearButton = new JButton("Clear All Results");
 		freqbox = new JSpinner(new SpinnerNumberModel(10, 0, 999, 1));
 		textbox = new JTextField(30);
 		scrollPane = new JScrollPane(wordsList);
