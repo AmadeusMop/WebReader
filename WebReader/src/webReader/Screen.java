@@ -182,7 +182,6 @@ public class Screen {
 			showError(e.toString());
 			throw e;
 		}
-		showMessage("Done!");
 		Update();
 	}
 	
